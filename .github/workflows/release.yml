@@ -1,0 +1,24 @@
+name: Release
+
+# Bir sürüm etiketi (v1.4.1 gibi) itildiğinde skill zip'ini paketler ve GitHub sürümünü yayınlar.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Skill zip'ini paketle
+        run: sh tools/package.sh
+      - name: Sürümü yayınla
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/reading-room-skill.zip \
+            --title "Reading Room ${GITHUB_REF_NAME#v}" \
+            --notes-file .github/release-notes.md
