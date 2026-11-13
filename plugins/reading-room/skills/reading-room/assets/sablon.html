@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="{{LANG}}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{TITLE}} — {{APP_NAME}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=Source+Sans+3:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f3e9d2; --text:#3b2f22; --muted:#7d6c56; --accent:#9a5b2e; --surface:#ebdfc4; --line:#d9c9a8; --hl:#e6d3a6; --pop:#f8f0dc; --shadow:rgba(60,40,10,.18);
+  --fs:20px; --lh:1.75; --w:36em;
+  --serif:"Literata",Georgia,serif; --sans:"Source Sans 3",system-ui,sans-serif;
+  --font:var(--serif);
+}
+html[data-theme="krem"]{--bg:#f6f2e9;--text:#36322b;--muted:#7b7365;--accent:#8a5a2b;--surface:#ece6d9;--line:#ddd5c4;--hl:#eadfc4;--pop:#fbf8f1;--shadow:rgba(40,30,10,.15)}
+html[data-theme="yesil"]{--bg:#e2eadb;--text:#2d3828;--muted:#5f6e57;--accent:#4f7340;--surface:#d6e0cd;--line:#c3d0b8;--hl:#cbdbbc;--pop:#edf2e8;--shadow:rgba(20,40,10,.15)}
+html[data-theme="gece"]{--bg:#1f1d1a;--text:#d5cab7;--muted:#958a78;--accent:#d29b66;--surface:#2a2724;--line:#3a3631;--hl:#4a3f2e;--pop:#2d2a26;--shadow:rgba(0,0,0,.5)}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font-family:var(--sans);transition:background .3s,color .3s;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+/* top bar */
+#top{position:fixed;inset:0 0 auto 0;height:52px;display:flex;align-items:center;gap:6px;padding:0 10px;background:var(--bg);border-bottom:1px solid var(--line);z-index:20;transition:transform .25s}
+#top.hide{transform:translateY(-100%)}
+.ib{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;color:var(--muted)}
+.ib:hover{background:var(--surface);color:var(--text)}
+.ib svg{width:22px;height:22px}
+#chap{flex:1;min-width:0;text-align:center;font-size:14px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#prog{position:absolute;left:0;bottom:-1px;height:2px;background:var(--accent);width:0;opacity:.7}
+/* reader */
+main{padding:84px 22px 140px;max-width:calc(var(--w) + 44px);margin:0 auto;font-family:var(--font);font-size:var(--fs);line-height:var(--lh)}
+section.ch{content-visibility:auto;contain-intrinsic-size:auto 3000px}
+main p{margin:0 0 .2em;text-indent:1.4em;hyphens:auto;-webkit-hyphens:auto;text-align:left;overflow-wrap:break-word}
+main h1+p,main h2+p,main .c+p{text-indent:0}
+main h1{font-size:1.25em;line-height:1.35;font-weight:600;text-align:center;margin:3.2em 0 .7em;letter-spacing:.02em}
+main section:first-child h1{margin-top:.5em}
+main h2{font-size:.9em;font-weight:600;text-align:center;margin:0 0 .3em;color:var(--muted)}
+main h2 b{font-weight:600}
+main .c{text-align:center;color:var(--muted);font-size:.85em;margin:0 0 1.6em}
+main i{font-style:italic}
+main sup{font-size:.62em;line-height:0;color:var(--accent);cursor:pointer;padding:0 .15em;font-family:var(--sans);font-weight:600}
+.pg{display:inline}
+.pg::before{content:attr(data-p);font-family:var(--sans);font-size:11px;color:var(--muted);opacity:.55;border:1px solid var(--line);border-radius:6px;padding:0 4px;margin:0 3px;vertical-align:2px;text-indent:0;line-height:1}
+main p,main h1{cursor:text}
+.wordmark{background:var(--hl);border-radius:3px;box-shadow:0 0 0 2px var(--hl)}
+::selection{background:var(--hl)}
+/* popover */
+#pop{position:fixed;z-index:40;width:min(360px,calc(100vw - 20px));background:var(--pop);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 36px var(--shadow);padding:14px 16px 12px;display:none;font-size:15.5px;line-height:1.55}
+#pop.on{display:block;animation:fade .15s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+#pop .w{font-family:var(--serif);font-size:20px;font-weight:600;margin-right:28px}
+#pop .lbl{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:10px 0 2px;font-weight:600}
+#pop .x{position:absolute;top:8px;right:8px}
+#pop .ai{white-space:pre-wrap}
+#pop .row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);border-radius:999px;padding:5px 12px;font-size:13.5px;color:var(--text);background:var(--bg)}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+a.chip{text-decoration:none;display:inline-block}
+.chip.pri{background:var(--accent);border-color:var(--accent);color:var(--bg)}
+.chip.pri:hover{filter:brightness(1.07);color:var(--bg)}
+.dots::after{content:"…";animation:dots 1.2s steps(3) infinite}
+.think{color:var(--muted);font-style:italic}
+/* selection bar */
+#selbar{position:fixed;left:50%;bottom:22px;transform:translate(-50%,140%);z-index:35;display:flex;gap:4px;padding:6px;background:var(--pop);border:1px solid var(--line);border-radius:999px;box-shadow:0 10px 30px var(--shadow);transition:transform .2s}
+#selbar.on{transform:translate(-50%,0)}
+#selbar button{padding:9px 15px;border-radius:999px;font-size:14.5px;font-weight:600;color:var(--text);white-space:nowrap}
+#selbar button:hover{background:var(--surface);color:var(--accent)}
+/* panel */
+#panel{position:fixed;z-index:45;background:var(--pop);border-left:1px solid var(--line);box-shadow:-10px 0 40px var(--shadow);display:flex;flex-direction:column;top:0;right:0;bottom:0;width:min(440px,100vw);transform:translateX(105%);transition:transform .25s}
+#panel.on{transform:none}
+@media (max-width:760px){#panel{top:auto;left:0;width:100%;height:78vh;border-left:0;border-top:1px solid var(--line);border-radius:18px 18px 0 0;transform:translateY(105%)}#panel.on{transform:none}}
+#panel header{display:flex;align-items:center;gap:8px;padding:12px 12px 10px 18px;border-bottom:1px solid var(--line)}
+#panel header h3{flex:1;margin:0;font-size:16px}
+#pbody{flex:1;overflow:auto;padding:14px 18px 20px;font-size:16px;line-height:1.65}
+.quote{font-family:var(--serif);font-size:14.5px;color:var(--muted);border-left:3px solid var(--line);padding:2px 0 2px 12px;margin:0 0 14px;max-height:9.5em;overflow:auto;white-space:pre-wrap}
+.msg{margin:0 0 16px}
+.msg.user{background:var(--surface);border-radius:12px;padding:8px 12px;font-size:15px}
+.msg.bot{font-family:var(--serif);font-size:17px}
+.msg.bot p{margin:0 0 .7em}
+.msg.bot ul{margin:0 0 .7em;padding-left:1.2em}
+.msg.bot li{margin:.2em 0}
+#pfoot{border-top:1px solid var(--line);padding:10px 12px;display:flex;gap:8px;flex-wrap:wrap}
+#pfoot form{display:flex;gap:8px;width:100%}
+#pfoot input{flex:1;min-width:0;font:inherit;font-size:15px;padding:9px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+#pfoot input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+/* drawer */
+#drawer{position:fixed;z-index:46;top:0;left:0;bottom:0;width:min(380px,92vw);background:var(--pop);border-right:1px solid var(--line);box-shadow:10px 0 40px var(--shadow);transform:translateX(-105%);transition:transform .25s;display:flex;flex-direction:column}
+#drawer.on{transform:none}
+#drawer header{display:flex;align-items:center;padding:12px 12px 8px 18px}
+#drawer header h3{flex:1;margin:0;font-size:16px}
+#toc{overflow:auto;padding:0 8px 20px;flex:1}
+#toc button{display:block;width:100%;text-align:left;padding:9px 10px;border-radius:10px;line-height:1.3}
+#toc button:hover{background:var(--surface)}
+#toc button.cur{background:var(--surface)}
+#toc .t{font-size:14.5px;font-weight:600}
+#toc .a{font-size:12.5px;color:var(--muted);display:flex;justify-content:space-between;margin-top:2px}
+#goto{display:flex;gap:8px;padding:6px 18px 12px;align-items:center;font-size:14px;color:var(--muted)}
+#goto input{width:70px;font:inherit;padding:6px 8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--text)}
+section.ch.off{display:none}
+main section.first h1{margin-top:.5em}
+#toc .ti{display:flex;align-items:center;border-radius:10px}
+#toc .ti.cur{background:var(--surface)}
+#toc .ti .go{flex:1;min-width:0}
+#toc .ti .eye{width:36px;height:36px;flex:none;display:grid;place-items:center;padding:0;color:var(--muted)}
+#toc .ti .eye svg{width:18px;height:18px}
+#toc .ti .eye:hover{color:var(--accent)}
+@media (hover:hover){#toc .ti:not(.hid) .eye{opacity:0}#toc .ti:hover .eye{opacity:1}}
+#toc .ti.hid .go{opacity:.55}
+#toc .ti.hid:hover .go{opacity:.85}
+#toc .tg{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:14px 6px 4px;padding:12px 4px 0;border-top:1px solid var(--line);font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+#toc .tg button{display:inline;width:auto;padding:3px 6px;text-transform:none;letter-spacing:0;color:var(--accent);font-size:13px;font-weight:600}
+#scrim{position:fixed;inset:0;background:rgba(0,0,0,.18);z-index:44;display:none}
+#scrim.on{display:block}
+/* settings */
+#set{position:fixed;z-index:41;top:58px;right:10px;width:300px;background:var(--pop);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 36px var(--shadow);padding:14px 16px;display:none;font-size:14px}
+#set.on{display:block}
+#set .lbl{font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:2px 0 8px;font-weight:600}
+.themes{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.themes button{height:52px;border-radius:12px;border:2px solid transparent;font-size:12px;font-weight:600;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px}
+.themes button.on{border-color:var(--accent)}
+.stepper{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.stepper .ctl{display:flex;align-items:center;gap:4px;background:var(--surface);border-radius:10px;padding:2px}
+.stepper .ctl button{width:38px;height:32px;border-radius:8px;font-size:16px}
+.stepper .ctl button:hover{background:var(--bg)}
+.stepper .v{min-width:34px;text-align:center;font-variant-numeric:tabular-nums;color:var(--muted)}
+.seg{display:flex;background:var(--surface);border-radius:10px;padding:2px}
+.seg button{flex:1;padding:6px;border-radius:8px}
+.seg button.on{background:var(--bg);font-weight:600}
+#help{margin-top:12px;font-size:12.5px;color:var(--muted);line-height:1.45}
+/* toast/intro */
+#intro{position:fixed;z-index:30;left:50%;transform:translateX(-50%);bottom:24px;width:min(460px,calc(100vw - 24px));background:var(--pop);border:1px solid var(--line);border-radius:14px;box-shadow:0 12px 36px var(--shadow);padding:14px 16px;font-size:14.5px;line-height:1.5;display:none}
+#intro.on{display:block}
+#intro b{color:var(--accent)}
+#intro .row{display:flex;justify-content:flex-end;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="top">
+  <button class="ib" id="bToc" data-ta="toc" title="İçindekiler" aria-label="İçindekiler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button>
+  <div id="chap">{{TITLE}}</div>
+  <button class="ib" id="bAsk" data-ta="whereAmI" title="Bulunduğum yeri özetle" aria-label="Bulunduğum yeri özetle"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/></svg></button>
+  <button class="ib" id="bSet" data-ta="view" title="Görünüm" aria-label="Görünüm ayarları"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19L9 5l5 14M5.8 14h6.4"/><path d="M15 19l3-8 3 8M15.9 16.5h4.2"/></svg></button>
+  <div id="prog"></div>
+</div>
+
+<div id="set" role="dialog" aria-label="Görünüm" data-ta="view">
+  <div class="lbl" data-t="color">Renk</div>
+  <div class="themes">
+    <button data-tk="sepya" style="background:#f3e9d2;color:#3b2f22" data-t="th_sepya">Sepya</button>
+    <button data-tk="krem" style="background:#f6f2e9;color:#36322b" data-t="th_krem">Krem</button>
+    <button data-tk="yesil" style="background:#e2eadb;color:#2d3828" data-t="th_yesil">Yeşil</button>
+    <button data-tk="gece" style="background:#1f1d1a;color:#d5cab7" data-t="th_gece">Gece</button>
+  </div>
+  <div class="stepper"><span data-t="fontSize">Yazı boyutu</span><div class="ctl"><button data-k="fs" data-d="-1">A−</button><span class="v" id="vfs"></span><button data-k="fs" data-d="1">A+</button></div></div>
+  <div class="stepper"><span data-t="lineHeight">Satır aralığı</span><div class="ctl"><button data-k="lh" data-d="-1">−</button><span class="v" id="vlh"></span><button data-k="lh" data-d="1">+</button></div></div>
+  <div class="stepper"><span data-t="lineWidth">Satır genişliği</span><div class="ctl"><button data-k="w" data-d="-1">−</button><span class="v" id="vw"></span><button data-k="w" data-d="1">+</button></div></div>
+  <div class="lbl" style="margin-top:4px" data-t="typeface">Yazı tipi</div>
+  <div class="seg" id="fontseg"><button data-f="serif" data-t="serif">Kitap</button><button data-f="sans" data-t="sans">Sade</button></div>
+  <div id="help" data-th="help">Bir kelimeye dokun: anlamı çıkar. Bir kısmı seç: alttaki çubuktan basitleştir, özetle ya da açıkla. Gizlenen bölümleri İçindekiler'den açabilirsin.</div>
+</div>
+
+<div id="drawer" aria-label="İçindekiler" data-ta="toc">
+  <header><h3 data-t="toc">İçindekiler</h3><button class="ib" data-close="drawer" data-ta="close" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <form id="goto"><span data-t="gotoPage">Sayfaya git:</span> <input type="number" inputmode="numeric" placeholder="s." data-tp="pageAbbr"> <button class="chip" type="submit" data-t="go">Git</button></form>
+  <div id="toc"></div>
+</div>
+
+<div id="panel" aria-label="Yardımcı" data-ta="helper">
+  <header><h3 id="ptitle">Basitleştir</h3><button class="ib" data-close="panel" data-ta="close" aria-label="Kapat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></header>
+  <div id="pbody"></div>
+  <div id="pfoot"></div>
+</div>
+<div id="scrim"></div>
+
+<div id="pop" role="dialog"></div>
+
+<div id="selbar">
+  <button data-a="cevir" data-t="translate" hidden>Çevir</button>
+  <button data-a="sade" data-t="simplify">Basitleştir</button>
+  <button data-a="ozet" data-t="summarize">Özetle</button>
+  <button data-a="acikla" data-t="explain">Açıkla</button>
+</div>
+
+<div id="intro"><span data-th="intro"><b>Nasıl kullanılır?</b> Bilmediğin bir kelimeye dokun, anlamı çıksın. Anlaşılmayan bir yeri seç; alttaki çubuktan <i>Basitleştir</i>, <i>Özetle</i> ya da <i>Açıkla</i>'yı kullan. Sağ üstteki <b>Aa</b> ile renkleri ve yazı boyutunu ayarlayabilirsin.</span><div class="row"><button class="chip pri" id="introOk" data-t="gotIt">Anladım</button></div></div>
+
+<main id="book"></main>
+
+<script type="application/json" id="config">
+{{CONFIG_JSON}}
+</script>
+<script type="application/json" id="data">
+{{DATA_JSON}}
+</script>
+<script type="application/json" id="gloss">
+{{GLOSS_JSON}}
+</script>
+<script>
+(function(){
+"use strict";
+const DATA = JSON.parse(document.getElementById('data').textContent);
+const GL = JSON.parse(document.getElementById('gloss').textContent);
+const I18N = {
+tr: {
+  toc:'İçindekiler', whereAmI:'Bulunduğum yeri özetle', view:'Görünüm', color:'Renk',
+  th_sepya:'Sepya', th_krem:'Krem', th_yesil:'Yeşil', th_gece:'Gece',
+  fontSize:'Yazı boyutu', lineHeight:'Satır aralığı', lineWidth:'Satır genişliği', typeface:'Yazı tipi', serif:'Kitap', sans:'Sade',
+  help:"Bir kelimeye dokun: anlamı çıkar. Bir kısmı seç: alttaki çubuktan basitleştir, özetle ya da açıkla. Gizlenen bölümleri İçindekiler'den açabilirsin.",
+  close:'Kapat', gotoPage:'Sayfaya git:', pageAbbr:'s.', go:'Git', helper:'Yardımcı',
+  simplify:'Basitleştir', summarize:'Özetle', explain:'Açıkla', whereTitle:'Bulunduğum yerin özeti',
+  intro:"<b>Nasıl kullanılır?</b> Bilmediğin bir kelimeye dokun, anlamı çıksın. Anlaşılmayan bir yeri seç; alttaki çubuktan <i>Basitleştir</i>, <i>Özetle</i> ya da <i>Açıkla</i>'yı kullan. Sağ üstteki <b>Aa</b> ile renkleri ve yazı boyutunu ayarlayabilirsin.",
+  translate:'Çevir', translation:'Çeviri', trHint:' Kelimeye dokunduğunda Türkçesi de çıkar; seçtiğin kısmı <i>Çevir</i> ile Türkçeye çevirebilirsin.', inTarget:'Türkçesi', translateSentence:'Cümleyi çevir', openTranslator:'Google Çeviri’de aç',
+  langNames:{tr:'Türkçe', en:'İngilizce', de:'Almanca', fr:'Fransızca', es:'İspanyolca', it:'İtalyanca', ru:'Rusça', ar:'Arapça', fa:'Farsça', la:'Latince', el:'Yunanca'},
+  pWordTr:(src, w, s) => '\n\nOkur ' + src + ' bir metindeki şu kelimenin Türkçesini soruyor: "' + w + '"\nGeçtiği cümle: "' + s + '"\n\nÖnce kelimenin bu cümledeki Türkçe karşılığını ver (bir-üç sözcük; gerekirse yalın hâlini parantez içinde yaz). Sonra tek kısa cümleyle bu bağlamda ne anlama geldiğini açıkla. Deyim ya da kalıp ifadenin parçasıysa onu belirt. Başlık, madde işareti ya da giriş cümlesi kullanma.',
+  tCevir:src => 'Bu ' + src + ' pasajı akıcı, doğal Türkçeye çevir. Anlamı ve üslubu koru; ekleme, yorum ya da özet yapma. Paragraf bölünmelerini koru. Özel adları ve alana özgü terimleri ilk geçtikleri yerde parantez içinde özgün hâlleriyle ver. Yalnızca çeviriyi yaz.',
+  gotIt:'Anladım', pagePrefix:'s. ', showCh:'Bölümü göster', hideCh:'Bölümü gizle',
+  hiddenN:n => 'Gizli bölümler (' + n + ')', allOpen:'Tüm bölümler açık', showAll:'Tümünü göster', resetDef:'Varsayılana dön',
+  errUnavailable:'Yapay zekâ yardımı bu görünümde kullanılamıyor. Seçtiğin kısmı kopyalayıp sohbette bana sorabilirsin.',
+  errRate:'Çok sık istek gönderildi. Biraz bekleyip tekrar dene.', errGeneric:'Bir sorun oldu.',
+  errFail:m => 'Cevap alınamadı' + (m ? ': ' + m : '') + '. Tekrar deneyebilirsin.',
+  bookLbl:'Kitap: ', chLbl:'Bölüm: ', glossLbl:'Sözlük', inSentence:'Bu cümlede', thinking:'Düşünüyorum',
+  meaningHere:'Bu cümledeki anlamı', simplifySentence:'Cümleyi basitleştir',
+  notInGloss:'Bu kelime sözlükte yok. Yapay zekâ yardımı bu görünümde açık değil; kelimeyi sohbette bana sorabilirsin.',
+  footnote:'Dipnot', noteMissing:'Bu dipnotun metni bulunamadı.',
+  copy:'Metni kopyala', copied:'Kopyalandı', copyFail:'Kopyalanamadı',
+  askPh:'Bu kısımla ilgili bir şey sor…', ask:'Sor', question:'Soru', simpler:'Daha da basit anlat', example:'Örnek ver',
+  pWord:(w, s, hint) => '\n\nOkur şu kelimenin anlamını soruyor: "' + w + '"\nGeçtiği cümle: "' + s + '"\n\nCevabı sade, günlük Türkçeyle ve en fazla 3 kısa cümleyle ver: önce kelimenin genel anlamını (gerekirse yalın hâlini) söyle, sonra bu cümlede ne anlama geldiğini açıkla. ' + hint + ' Başlık, madde işareti ya da giriş cümlesi kullanma.',
+  tSade:a => 'Bu pasajı ' + a + ' birinin rahatça anlayacağı sade, günlük Türkçeyle yeniden anlat. Uzun cümleleri böl, ağır kelimelerin yerine basit karşılıklarını kullan, alana özgü terimleri bir iki kelimeyle aç. Anlamı değiştirme, yorum ekleme. Pasajdan çok daha uzun yazma.',
+  tOzet:'Bu pasajı 2-5 kısa maddede özetle. Her madde tek, sade bir cümle olsun. En sonda "Kısaca:" ile başlayan tek cümlelik bir ana fikir yaz.',
+  tAcikla:'Bu pasajda yazar ne demek istiyor? Sade Türkçeyle açıkla: ana düşünceyi söyle, varsa önemli kavramları kısaca tanımla ve yazarın genel düşüncesi içinde bu pasajın neden önemli olduğunu bir iki cümleyle belirt. Kısa paragraflar kullan.',
+  tYer:'Okur kitabın şu bölümünü okuyor. Bu kısımda anlatılanları sade Türkçeyle 3-6 maddede özetle, sonra "Kısaca:" ile başlayan tek cümlelik ana fikri yaz.',
+  pPassage:'Pasaj', pTask:'Görev', pTail:'Cevabı Türkçe yaz. Giriş cümlesi ("Elbette" vb.) kullanma.',
+  pSimpler:'Bunu daha da basit anlat; sanki 14 yaşında birine anlatıyormuşsun gibi, kısa cümlelerle ve gerekirse günlük hayattan bir örnekle.',
+  pExample:'Bu düşünceyi somut, günlük hayattan ya da tarihten bir örnekle açıkla.',
+  persona:'Sen zor bir metni okuyan birine yardım eden sabırlı bir öğretmensin.', audience:'konuya yabancı',
+  termHint:'Alana özgü bir terimse bu metindeki özel anlamını kısaca belirt.',
+  smallWords:['ve','ile','bir','üzerine','olarak','mu','mı','için','de','da','ya','veya','ki']
+},
+en: {
+  toc:'Contents', whereAmI:'Summarize where I am', view:'Display', color:'Color',
+  th_sepya:'Sepia', th_krem:'Cream', th_yesil:'Green', th_gece:'Night',
+  fontSize:'Text size', lineHeight:'Line spacing', lineWidth:'Line width', typeface:'Typeface', serif:'Book', sans:'Plain',
+  help:'Tap a word to see its meaning. Select a passage to simplify, summarize or explain it from the bar below. Hidden chapters can be opened from Contents.',
+  close:'Close', gotoPage:'Go to page:', pageAbbr:'p.', go:'Go', helper:'Helper',
+  simplify:'Simplify', summarize:'Summarize', explain:'Explain', whereTitle:'Summary of where I am',
+  intro:'<b>How it works</b> Tap a word you don\'t know to see its meaning. Select a passage that\'s hard to follow and use <i>Simplify</i>, <i>Summarize</i> or <i>Explain</i> from the bar below. Use <b>Aa</b> at the top right to change colors and text size.',
+  translate:'Translate', translation:'Translation', trHint:' Tapping a word also gives its English equivalent; use <i>Translate</i> to put a selected passage into English.', inTarget:'In English', translateSentence:'Translate the sentence', openTranslator:'Open in Google Translate',
+  langNames:{tr:'Turkish', en:'English', de:'German', fr:'French', es:'Spanish', it:'Italian', ru:'Russian', ar:'Arabic', fa:'Persian', la:'Latin', el:'Greek'},
+  pWordTr:(src, w, s) => '\n\nThe reader wants the English for this word from a ' + src + ' text: "' + w + '"\nThe sentence it appears in: "' + s + '"\n\nFirst give the English equivalent of the word in this sentence (one to three words; add the base form in brackets if useful). Then explain in one short sentence what it means in this context. Say so if it is part of an idiom or fixed expression. Do not use headings, bullet points or an introductory sentence.',
+  tCevir:src => 'Translate this ' + src + ' passage into fluent, natural English. Keep the meaning and tone; do not add, comment or summarize. Keep the paragraph breaks. Give proper names and specialist terms in their original form in brackets the first time they appear. Write only the translation.',
+  gotIt:'Got it', pagePrefix:'p. ', showCh:'Show chapter', hideCh:'Hide chapter',
+  hiddenN:n => 'Hidden chapters (' + n + ')', allOpen:'All chapters visible', showAll:'Show all', resetDef:'Reset to default',
+  errUnavailable:'AI help isn\'t available in this view. You can copy the passage and ask me about it in the chat.',
+  errRate:'Too many requests. Wait a moment and try again.', errGeneric:'Something went wrong.',
+  errFail:m => 'No answer received' + (m ? ': ' + m : '') + '. You can try again.',
+  bookLbl:'Book: ', chLbl:'Chapter: ', glossLbl:'Glossary', inSentence:'In this sentence', thinking:'Thinking',
+  meaningHere:'Meaning in this sentence', simplifySentence:'Simplify the sentence',
+  notInGloss:'This word isn\'t in the glossary. AI help isn\'t available in this view; you can ask me about the word in the chat.',
+  footnote:'Footnote', noteMissing:'The text of this footnote wasn\'t found.',
+  copy:'Copy text', copied:'Copied', copyFail:'Couldn\'t copy',
+  askPh:'Ask something about this passage…', ask:'Ask', question:'Question', simpler:'Explain it even more simply', example:'Give an example',
+  pWord:(w, s, hint) => '\n\nThe reader is asking what this word means: "' + w + '"\nThe sentence it appears in: "' + s + '"\n\nAnswer in plain, everyday English in at most 3 short sentences: first give the word\'s general meaning (and its base form if useful), then explain what it means in this sentence. ' + hint + ' Do not use headings, bullet points or an introductory sentence.',
+  tSade:a => 'Rewrite this passage in plain, everyday English so that ' + a + ' can follow it easily. Break up long sentences, replace heavy words with simple ones, and gloss specialist terms in a word or two. Do not change the meaning or add commentary. Do not write much more than the passage itself.',
+  tOzet:'Summarize this passage in 2-5 short bullet points, each a single plain sentence. End with a one-sentence main idea starting with "In short:".',
+  tAcikla:'What is the author saying in this passage? Explain in plain English: state the main idea, briefly define any important concepts, and say in a sentence or two why this passage matters within the author\'s wider thinking. Use short paragraphs.',
+  tYer:'The reader is at this part of the book. Summarize what it covers in 3-6 plain-English bullet points, then give the main idea in one sentence starting with "In short:".',
+  pPassage:'Passage', pTask:'Task', pTail:'Answer in English. Do not open with filler ("Certainly", "Sure", etc.).',
+  pSimpler:'Explain this even more simply, as if to a 14-year-old, with short sentences and an everyday example if it helps.',
+  pExample:'Explain this idea with a concrete example from everyday life or from history.',
+  persona:'You are a patient teacher helping someone read a difficult text.', audience:'a reader new to the subject',
+  termHint:'If it is a specialist term, briefly note the particular sense it has in this text.',
+  smallWords:['a','an','the','and','or','but','nor','of','in','on','at','to','for','with','by','from','as','into','upon','vs']
+}
+};
+const CFG0 = JSON.parse(document.getElementById('config').textContent);
+const LANG = I18N[CFG0.lang] ? CFG0.lang : 'tr';
+const T = I18N[LANG];
+const CFG = Object.assign({
+  storePrefix: 'rr_', locale: LANG, hidden: [], book: '',
+  persona: T.persona, audience: T.audience, termHint: T.termHint, smallWords: T.smallWords
+}, CFG0);
+if (!CFG0.smallWords && I18N[CFG.locale]) CFG.smallWords = I18N[CFG.locale].smallWords;
+document.documentElement.lang = LANG;
+const SRC_LANG = (CFG.locale || LANG).split('-')[0];
+const TRANSLATE = CFG.translate != null ? !!CFG.translate : SRC_LANG !== LANG;
+const SRC_NAME = T.langNames[SRC_LANG] || SRC_LANG;
+const gtUrl = t => 'https://translate.google.com/?sl=' + encodeURIComponent(SRC_LANG) + '&tl=' + LANG + '&op=translate&text=' + encodeURIComponent(t.slice(0, 4500));
+function gtLink(t){ const a = document.createElement('a'); a.className = 'chip'; a.href = gtUrl(t); a.target = '_blank'; a.rel = 'noopener'; a.textContent = T.openTranslator; return a; }
+document.querySelectorAll('[data-t]').forEach(e => { e.textContent = T[e.dataset.t]; });
+document.querySelectorAll('[data-th]').forEach(e => { e.innerHTML = T[e.dataset.th]; });
+document.querySelectorAll('[data-tp]').forEach(e => { e.placeholder = T[e.dataset.tp]; });
+document.querySelectorAll('[data-ta]').forEach(e => { if (e.hasAttribute('title')) e.title = T[e.dataset.ta]; e.setAttribute('aria-label', T[e.dataset.ta]); });
+const $ = s => document.querySelector(s);
+const book = $('#book');
+book.lang = (JSON.parse(document.getElementById('config').textContent).locale) || document.documentElement.lang;
+const store = {
+  get(k,d){ try{ const v = localStorage.getItem(CFG.storePrefix+k); return v==null?d:JSON.parse(v);}catch(e){return d;} },
+  set(k,v){ try{ localStorage.setItem(CFG.storePrefix+k, JSON.stringify(v)); }catch(e){} }
+};
+const lower = s => s.toLocaleLowerCase(CFG.locale);
+
+/* ---------- render book ---------- */
+let gi = 0;
+const chEls = [];
+const frag = document.createDocumentFragment();
+DATA.chapters.forEach((ch, ci) => {
+  const sec = document.createElement('section');
+  sec.className = 'ch'; sec.dataset.ci = ci;
+  let h = '';
+  ch.blocks.forEach(b => {
+    const tag = b.t === 'h1' ? 'h1' : b.t === 'h2' ? 'h2' : 'p';
+    const cls = b.t === 'c' ? ' class="c"' : '';
+    h += '<' + tag + cls + ' data-i="' + (gi++) + '">' + b.h + '</' + tag + '>';
+  });
+  sec.innerHTML = h;
+  frag.appendChild(sec);
+  chEls.push(sec);
+});
+book.appendChild(frag);
+
+/* ---------- TOC ---------- */
+const toc = $('#toc');
+/* ---------- bölüm gizleme ---------- */
+const DEF_HID = (CFG.hidden || []).filter(i => i >= 0 && i < DATA.chapters.length);
+const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>', EYE_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6C3.9 8.4 2 12 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+let hid = new Set((() => { const h = store.get('hid', null); return Array.isArray(h) ? h : DEF_HID; })());
+let blocks = [];
+function applyHid(){
+  chEls.forEach((s, ci) => s.classList.toggle('off', hid.has(ci)));
+  const f = chEls.find(s => !s.classList.contains('off'));
+  chEls.forEach(s => s.classList.toggle('first', s === f));
+  store.set('hid', [...hid]);
+  blocks = [...book.querySelectorAll('section.ch:not(.off) [data-i]')];
+  renderToc();
+}
+function setHidden(ci, h, jump){
+  const anchor = topBlock();
+  if (h) hid.add(ci); else hid.delete(ci);
+  applyHid();
+  if (jump) { closeAll(); chEls[ci].scrollIntoView(); window.scrollBy(0,-60); }
+  else if (anchor && !anchor.closest('.off')) { anchor.scrollIntoView({block:'start'}); window.scrollBy(0,-70); }
+  if (typeof onScroll === 'function') requestAnimationFrame(onScroll);
+}
+function renderToc(){
+  toc.innerHTML = '';
+  const mk = ci => {
+    const ch = DATA.chapters[ci], isH = hid.has(ci);
+    const d = document.createElement('div'); d.className = 'ti' + (isH ? ' hid' : ''); d.dataset.ci = ci;
+    d.innerHTML = '<button class="go"><div class="t"></div><div class="a"><span></span><span>' + (ch.page != null ? T.pagePrefix + ch.page : '') + '</span></div></button><button class="eye"></button>';
+    d.querySelector('.t').textContent = titleCase(ch.title);
+    d.querySelector('.a span').textContent = ch.author || '';
+    d.querySelector('.go').onclick = () => { if (hid.has(ci)) setHidden(ci, false, true); else { closeAll(); chEls[ci].scrollIntoView(); window.scrollBy(0,-60); } };
+    const e = d.querySelector('.eye'); e.innerHTML = isH ? EYE : EYE_OFF; e.title = isH ? T.showCh : T.hideCh; e.setAttribute('aria-label', e.title);
+    e.onclick = ev => { ev.stopPropagation(); setHidden(ci, !hid.has(ci), false); };
+    return d;
+  };
+  DATA.chapters.forEach((c, ci) => { if (!hid.has(ci)) toc.appendChild(mk(ci)); });
+  const isDef = hid.size === DEF_HID.length && DEF_HID.every(x => hid.has(x));
+  const g = document.createElement('div'); g.className = 'tg';
+  g.innerHTML = '<span>' + (hid.size ? T.hiddenN(hid.size) : T.allOpen) + '</span><span></span>';
+  const acts = g.lastChild;
+  if (hid.size) { const a = document.createElement('button'); a.textContent = T.showAll; a.onclick = () => { const anc = topBlock(); hid.clear(); applyHid(); if (anc) { anc.scrollIntoView({block:'start'}); window.scrollBy(0,-70); } }; acts.appendChild(a); }
+  if (!isDef) { const r = document.createElement('button'); r.textContent = T.resetDef; r.onclick = () => { const anc = topBlock(); hid = new Set(DEF_HID); applyHid(); if (anc && !anc.closest('.off')) { anc.scrollIntoView({block:'start'}); window.scrollBy(0,-70); } }; acts.appendChild(r); }
+  toc.appendChild(g);
+  DATA.chapters.forEach((c, ci) => { if (hid.has(ci)) toc.appendChild(mk(ci)); });
+}
+function titleCase(s){
+  const small = new Set(CFG.smallWords);
+  const ROMAN = /^(?=[MDCLXVI])M{0,3}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})[.,:;]?$/;
+  return s.split(/(\s+)/).map((w0,i) => { if (ROMAN.test(w0)) return w0; const w = lower(w0); return (i>0 && small.has(w)) ? w : w.charAt(0).toLocaleUpperCase(CFG.locale) + w.slice(1); }).join('').replace(/’(\p{L})/gu, (m,c)=>'’'+c.toLocaleLowerCase(CFG.locale));
+}
+(() => { const ps = [...document.querySelectorAll('.pg')].map(m => +m.dataset.p).filter(n => n > 0); const gi = $('#goto input'); if (ps.length) { gi.min = Math.min(...ps); gi.max = Math.max(...ps); } else $('#goto').style.display = 'none'; })();
+$('#goto').addEventListener('submit', e => {
+  e.preventDefault();
+  const n = parseInt($('#goto input').value, 10);
+  if (!n) return;
+  const ms = [...document.querySelectorAll('.pg')];
+  let best = null;
+  for (const m of ms) { if (+m.dataset.p <= n) best = m; else break; }
+  if (best) { const sec = best.closest('section'); if (sec.classList.contains('off')) setHidden(+sec.dataset.ci, false, false); closeAll(); best.scrollIntoView({block:'start'}); window.scrollBy(0,-80); }
+});
+
+/* ---------- settings ---------- */
+const S = Object.assign({theme:'sepya', fs:20, lh:1.75, w:36, font:'serif'}, store.get('set', {}));
+function applySet(){
+  const r = document.documentElement;
+  r.dataset.theme = S.theme;
+  r.style.setProperty('--fs', S.fs + 'px');
+  r.style.setProperty('--lh', S.lh);
+  r.style.setProperty('--w', S.w + 'em');
+  r.style.setProperty('--font', S.font === 'sans' ? 'var(--sans)' : 'var(--serif)');
+  $('#vfs').textContent = S.fs; $('#vlh').textContent = S.lh.toFixed(2).replace(/0$/,''); $('#vw').textContent = S.w;
+  document.querySelectorAll('.themes button').forEach(b => b.classList.toggle('on', b.dataset.tk === S.theme));
+  document.querySelectorAll('#fontseg button').forEach(b => b.classList.toggle('on', b.dataset.f === S.font));
+  const meta = document.querySelector('meta[name=theme-color]');
+  store.set('set', S);
+}
+document.querySelectorAll('.themes button').forEach(b => b.onclick = () => { S.theme = b.dataset.tk; applySet(); });
+document.querySelectorAll('#fontseg button').forEach(b => b.onclick = () => { S.font = b.dataset.f; applySet(); });
+document.querySelectorAll('.stepper button').forEach(b => b.onclick = () => {
+  const anchor = topBlock();
+  const d = +b.dataset.d, k = b.dataset.k;
+  if (k === 'fs') S.fs = Math.min(30, Math.max(15, S.fs + d));
+  if (k === 'lh') S.lh = Math.round(Math.min(2.3, Math.max(1.4, S.lh + d * 0.1)) * 100) / 100;
+  if (k === 'w') S.w = Math.min(48, Math.max(26, S.w + d * 2));
+  applySet();
+  if (anchor) { anchor.scrollIntoView({block:'start'}); window.scrollBy(0,-70); }
+});
+applySet();
+
+/* ---------- panels ---------- */
+const scrim = $('#scrim');
+function openEl(id){ closeAll(); $(id).classList.add('on'); if (id !== '#set') scrim.classList.add('on'); }
+function closeAll(){ ['#drawer','#panel','#set'].forEach(i => $(i).classList.remove('on')); scrim.classList.remove('on'); hidePop(); }
+$('#bToc').onclick = () => { markToc(); openEl('#drawer'); };
+$('#bSet').onclick = e => { e.stopPropagation(); const on = $('#set').classList.contains('on'); closeAll(); if (!on) $('#set').classList.add('on'); };
+scrim.onclick = closeAll;
+document.querySelectorAll('[data-close]').forEach(b => b.onclick = () => { $('#' + b.dataset.close).classList.remove('on'); scrim.classList.remove('on'); if (b.dataset.close==='panel') abortAll(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
+document.addEventListener('click', e => {
+  // açılır kutu: kitap metninin dışında boş bir yere tıklanınca kapanır (metin içindeki tıklamaları kitap dinleyicisi yönetir)
+  if (pop.classList.contains('on') && !e.target.closest('#pop') && !e.target.closest('#book') && !e.target.closest('#selbar')) hidePop();
+  if ($('#set').classList.contains('on') && !e.target.closest('#set') && !e.target.closest('#bSet')) $('#set').classList.remove('on');
+});
+
+/* ---------- scroll: progress, chapter, position ---------- */
+applyHid();
+function topBlock(){
+  // binary search first block whose bottom > 70
+  let lo = 0, hi = blocks.length - 1, ans = null;
+  while (lo <= hi) {
+    const mid = (lo + hi) >> 1;
+    const r = blocks[mid].getBoundingClientRect();
+    if (r.bottom > 70) { ans = blocks[mid]; hi = mid - 1; } else lo = mid + 1;
+  }
+  return ans;
+}
+let curCi = -1, lastY = window.scrollY, ticking = false;
+function onScroll(){
+  ticking = false;
+  const y = window.scrollY, H = document.documentElement.scrollHeight - innerHeight;
+  $('#prog').style.width = (H > 0 ? (y / H * 100) : 0) + '%';
+  const tb = topBlock();
+  if (tb) {
+    const ci = +tb.closest('section').dataset.ci;
+    if (ci !== curCi) { curCi = ci; const ch = DATA.chapters[ci]; $('#chap').textContent = (ch.author ? ch.author.split(' ').slice(-1)[0] + ' · ' : '') + titleCase(ch.title); }
+    store.set('pos', +tb.dataset.i);
+  }
+  const top = $('#top');
+  if (y > lastY + 6 && y > 200 && !document.querySelector('#set.on')) top.classList.add('hide');
+  else if (y < lastY - 6) top.classList.remove('hide');
+  lastY = y;
+}
+window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } hidePop(); }, {passive:true});
+function markToc(){ toc.querySelectorAll('.ti').forEach(b => b.classList.toggle('cur', +b.dataset.ci === curCi)); const c = toc.querySelector('.ti[data-ci="' + curCi + '"]'); if (c) c.scrollIntoView({block:'center'}); }
+const pos = store.get('pos', 0);
+requestAnimationFrame(() => {
+  const pe = pos ? book.querySelector('[data-i="' + pos + '"]') : null;
+  if (pe && !pe.closest('.off')) { pe.scrollIntoView({block:'start'}); window.scrollBy(0,-70); }
+  onScroll();
+});
+
+/* ---------- Claude (sample) ---------- */
+let sample = null;
+try {
+  if (window.claude && claude.use) claude.use('sample').then(s => { sample = s || null; }).catch(() => {});
+} catch (e) {}
+const ctrls = new Set();
+function abortAll(){ ctrls.forEach(c => { try{c.abort();}catch(e){} }); ctrls.clear(); }
+async function ask(input, onText, opts){
+  if (!sample) throw {code:'unavailable'};
+  const ac = new AbortController(); ctrls.add(ac);
+  try {
+    const r = await sample(input, Object.assign({signal: ac.signal, onText: ({text}) => onText(text)}, opts || {}));
+    onText(r.text);
+    return r.text;
+  } finally { ctrls.delete(ac); }
+}
+function errMsg(e){
+  if (!e) return T.errGeneric;
+  if (e.code === 'unavailable' || e.code === 'not_granted') return T.errUnavailable;
+  if (e.code === 'rate_limited') return T.errRate;
+  if (e.name === 'AbortError' || e.code === 'aborted') return '';
+  return T.errFail(e.message);
+}
+const BOOK = CFG.book ? T.bookLbl + CFG.book + '.' : '';
+function chInfo(el){ const ch = DATA.chapters[+el.closest('section').dataset.ci]; return T.chLbl + '"' + titleCase(ch.title) + '"' + (ch.author ? ' — ' + ch.author : '') + '.'; }
+
+/* tiny safe markdown */
+function md(t){
+  const esc = s => s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const inline = s => esc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>');
+  const lines = t.replace(/\r/g,'').split('\n');
+  let out = '', list = false, para = [];
+  const flush = () => { if (para.length) { out += '<p>' + para.map(inline).join('<br>') + '</p>'; para = []; } };
+  for (let l of lines) {
+    const m = l.match(/^\s*(?:[-*•]|\d+[.)])\s+(.*)/);
+    if (m) { flush(); if (!list) { out += '<ul>'; list = true; } out += '<li>' + inline(m[1]) + '</li>'; continue; }
+    if (list) { out += '</ul>'; list = false; }
+    if (!l.trim()) { flush(); continue; }
+    para.push(l.replace(/^#+\s*/,''));
+  }
+  flush(); if (list) out += '</ul>';
+  return out;
+}
+
+/* ---------- glossary ---------- */
+const GKEYS = Object.keys(GL).sort((a,b) => b.length - a.length);
+const SUF = /^(?:['’].*|(?:y|n|s|ş)?(?:i|ı|u|ü|e|a|in|ın|un|ün|de|da|den|dan|te|ta|ten|tan|le|la|ler|lar|leri|ları|im|ım|imiz|ımız|iniz|ınız|dir|dır|dur|dür|tir|tır|sel|sal|ki|ce|ca|nde|nda|nden|ndan|ne|na|ni|nı|nin|nın|ine|ına|ini|ını|inin|ının|ye|ya|yi|yı|yle|yla|ken))*$/;
+const SUF_EN = /^(?:s|es|'s|’s|ed|d|ing|ly|er|ers|al|ally|ism|isms|ist|ists|ical)?$/;
+function gmatch(w){
+  if (!w) return null;
+  w = w.replace(/['’].*$/,'');
+  if (GL[w]) return w;
+  if (CFG.locale !== 'tr') {
+    const c = [w.replace(/ies$/,'y'), w.replace(/ied$/,'y'), w.replace(/es$/,''), w.replace(/s$/,''), w.replace(/ed$/,''), w.replace(/d$/,''), w.replace(/ing$/,''), w.replace(/ing$/,'e'), w.replace(/ly$/,''), w.replace(/ily$/,'y')];
+    for (const x of c) if (x !== w && x.length > 2 && GL[x]) return x;
+  }
+  for (const k of GKEYS) {
+    if (k.includes(' ')) continue;
+    if (w.startsWith(k)) {
+      const rest = w.slice(k.length);
+      const SFX = CFG.locale === 'tr' ? SUF : SUF_EN;
+      if (k.length >= 5 && rest.length <= 7 && SFX.test(rest)) return k;
+      if (k.length < 5 && SFX.test(rest) && rest.length <= 5) return k;
+    }
+  }
+  // vowel drop: akl-, ilk...
+  if (CFG.locale === 'tr' && GL['akıl'] && /^akl/.test(w)) return 'akıl';
+  return null;
+}
+function gphrase(prev, w, next){
+  const cands = [];
+  if (next) cands.push(w + ' ' + next);
+  if (prev) cands.push(prev + ' ' + w);
+  for (const c of cands) {
+    for (const k of GKEYS) {
+      if (!k.includes(' ')) continue;
+      if (c.startsWith(k) || c.replace(/-/g,' ').startsWith(k)) {
+        const rest = c.slice(k.length).replace(/['’].*$/,'');
+        if (rest.length <= 7 && (CFG.locale === 'tr' ? SUF : SUF_EN).test(rest)) return k;
+      }
+    }
+  }
+  return null;
+}
+
+/* ---------- word click ---------- */
+const pop = $('#pop');
+let markRange = null, popTimer = null;
+const LET = /[\p{L}\p{M}\-]/u;
+function caretAt(x, y){
+  if (document.caretPositionFromPoint) { const p = document.caretPositionFromPoint(x, y); return p ? {node:p.offsetNode, off:p.offset} : null; }
+  if (document.caretRangeFromPoint) { const r = document.caretRangeFromPoint(x, y); return r ? {node:r.startContainer, off:r.startOffset} : null; }
+  return null;
+}
+function hidePop(){ pop.classList.remove('on'); clearMark(); }
+function clearMark(){ if (markRange && CSS.highlights) CSS.highlights.delete('w'); document.querySelectorAll('.wordmark').forEach(s => { s.replaceWith(...s.childNodes); }); markRange = null; }
+function placePop(rect){
+  pop.classList.add('on');
+  const pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let left = Math.min(Math.max(10, rect.left + rect.width/2 - pw/2), innerWidth - pw - 10);
+  let top = rect.bottom + 10;
+  if (top + ph > innerHeight - 10) top = Math.max(60, rect.top - ph - 10);
+  pop.style.left = left + 'px'; pop.style.top = top + 'px';
+}
+/* dipnot işaretleri (<sup>) yapay zekâya giden metne karışmasın */
+function plainText(el, stopNode, stopOff){
+  const w = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  let n, out = '';
+  while ((n = w.nextNode())) {
+    const inSup = n.parentElement && n.parentElement.closest('sup');
+    if (n === stopNode) return out.length + (inSup ? 0 : stopOff);
+    if (!inSup) out += n.data;
+  }
+  return stopNode ? out.length : out;
+}
+function textOffsetIn(el, node, off){ return plainText(el, node, off); }
+function selText(sel){
+  if (!sel || !sel.rangeCount) return '';
+  const parts = [];
+  for (let i = 0; i < sel.rangeCount; i++) {
+    const f = sel.getRangeAt(i).cloneContents();
+    f.querySelectorAll('sup').forEach(x => x.remove());
+    const bl = f.querySelectorAll('[data-i]');
+    parts.push(bl.length ? [...bl].map(b => b.textContent.trim()).filter(Boolean).join('\n\n') : f.textContent);
+  }
+  return parts.join('\n\n');
+}
+book.addEventListener('click', e => {
+  const sup = e.target.closest('sup');
+  if (sup) { e.preventDefault(); showNote(sup); return; }
+  const sel = window.getSelection();
+  if (sel && sel.toString().trim().length > 0) return;
+  const blk = e.target.closest('[data-i]');
+  if (!blk) { hidePop(); return; }
+  const c = caretAt(e.clientX, e.clientY);
+  if (!c || c.node.nodeType !== 3) { hidePop(); return; }
+  const t = c.node.data;
+  let s = c.off, en = c.off;
+  while (s > 0 && LET.test(t[s-1])) s--;
+  while (en < t.length && LET.test(t[en])) en++;
+  // include apostrophe suffix (Kant'ın)
+  let en2 = en;
+  if (t[en2] === '’' || t[en2] === "'") { en2++; while (en2 < t.length && LET.test(t[en2])) en2++; }
+  let word = t.slice(s, en).replace(/^-+|-+$/g,'');
+  if (!word || word.length < 2) { hidePop(); return; }
+  const r = document.createRange(); r.setStart(c.node, s); r.setEnd(c.node, en2);
+  const rect = r.getBoundingClientRect();
+  if (e.clientX < rect.left - 4 || e.clientX > rect.right + 4 || e.clientY < rect.top - 4 || e.clientY > rect.bottom + 4) { hidePop(); return; }
+  const full = t.slice(s, en2);
+  // context
+  const ptext = plainText(blk);
+  const goff = textOffsetIn(blk, c.node, s);
+  const sentStart = Math.max(ptext.lastIndexOf('. ', goff), ptext.lastIndexOf('? ', goff), ptext.lastIndexOf('! ', goff), ptext.lastIndexOf('; ', goff - 1) > goff - 160 ? ptext.lastIndexOf('; ', goff-1) : -1);
+  let sentEnd = ptext.slice(goff).search(/[.?!](\s|$)/);
+  sentEnd = sentEnd < 0 ? ptext.length : goff + sentEnd + 1;
+  const sentence = ptext.slice(sentStart < 0 ? 0 : sentStart + 2, sentEnd).trim();
+  const before = lower(ptext.slice(Math.max(0, goff - 30), goff)).match(/([\p{L}\-]+)\s*$/u);
+  const after = lower(ptext.slice(goff + full.length, goff + full.length + 30)).match(/^\s*([\p{L}\-’']+)/u);
+  clearMark();
+  try { const span = document.createElement('span'); span.className = 'wordmark'; r.surroundContents(span); markRange = span; } catch(err) {}
+  showWord(full, lower(word), before && before[1], after && after[1], sentence, ptext, blk, rect);
+});
+function showWord(display, lw, prev, next, sentence, para, blk, rect){
+  const k = gphrase(prev, lw, next) || gmatch(lw);
+  pop.innerHTML = '';
+  const x = document.createElement('button'); x.className = 'ib x'; x.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>'; x.onclick = hidePop; x.setAttribute('aria-label', T.close);
+  pop.appendChild(x);
+  const w = document.createElement('div'); w.className = 'w'; w.lang = CFG.locale; w.textContent = display; pop.appendChild(w);
+  if (k) {
+    const l = document.createElement('div'); l.className = 'lbl'; l.textContent = T.glossLbl; if (k !== lw) { const ks = document.createElement('span'); ks.lang = CFG.locale; ks.textContent = ' · ' + k; l.appendChild(ks); } pop.appendChild(l);
+    const d = document.createElement('div'); d.textContent = GL[k]; pop.appendChild(d);
+  }
+  const l2 = document.createElement('div'); l2.className = 'lbl'; l2.textContent = TRANSLATE ? T.inTarget : T.inSentence;
+  const ai = document.createElement('div'); ai.className = 'ai';
+  const row = document.createElement('div'); row.className = 'row';
+  const run = () => {
+    if (!l2.isConnected) { pop.insertBefore(l2, row); pop.insertBefore(ai, row); }
+    ai.innerHTML = '<span class="think dots">' + T.thinking + '</span>';
+    placePop(rect);
+    const prompt = CFG.persona + ' ' + BOOK + ' ' + chInfo(blk) + (TRANSLATE ? T.pWordTr(SRC_NAME, display, sentence.slice(0, 700)) : T.pWord(display, sentence.slice(0, 700), CFG.termHint));
+    ask(prompt, txt => { ai.textContent = txt || ''; if (!txt) ai.innerHTML = '<span class="think dots">' + T.thinking + '</span>'; placePop(rect); }, {modelTier:'quick', cache:true})
+      .catch(e => { ai.textContent = errMsg(e); placePop(rect); });
+  };
+  pop.appendChild(row);
+  if (sample && k && !TRANSLATE) { const b = document.createElement('button'); b.className = 'chip'; b.textContent = T.meaningHere; b.onclick = () => { b.remove(); run(); }; row.appendChild(b); }
+  if (TRANSLATE) { const bt = document.createElement('button'); bt.className = 'chip'; bt.textContent = T.translateSentence; bt.onclick = () => { hidePop(); openHelper('cevir', sentence, blk); }; row.appendChild(bt); }
+  const b2 = document.createElement('button'); b2.className = 'chip'; b2.textContent = T.simplifySentence; b2.onclick = () => { hidePop(); openHelper('sade', sentence, blk); };
+  row.appendChild(b2);
+  if (TRANSLATE && !sample) row.appendChild(gtLink(sentence));
+  placePop(rect);
+  if (!k || TRANSLATE) {
+    if (sample) run();
+    else if (!k) { const d = document.createElement('div'); d.style.color = 'var(--muted)'; d.textContent = T.notInGloss; pop.insertBefore(d, row); placePop(rect); }
+  }
+}
+
+/* ---------- footnotes ---------- */
+function showNote(sup){
+  const p = +sup.dataset.p, m = sup.textContent.trim();
+  let note = null;
+  for (const dp of [0, 1, -1, 2, -2]) {
+    const arr = DATA.notes[p + dp];
+    if (!arr) continue;
+    note = arr.find(n => n.m === m);
+    if (note) break;
+  }
+  pop.innerHTML = '<button class="ib x" aria-label="' + T.close + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button><div class="lbl" style="margin-top:0">' + T.footnote + ' ' + (m === '∗' ? '' : m) + '</div><div class="nt" style="font-family:var(--serif);font-size:15px;max-height:50vh;overflow:auto"></div>';
+  pop.querySelector('.x').onclick = hidePop;
+  pop.querySelector('.nt').innerHTML = note ? note.h : T.noteMissing;
+  placePop(sup.getBoundingClientRect());
+}
+
+/* ---------- selection bar ---------- */
+const selbar = $('#selbar');
+if (TRANSLATE) { selbar.querySelector('[data-a="cevir"]').hidden = false; $('#intro [data-th]').insertAdjacentHTML('beforeend', T.trHint); $('#help').insertAdjacentHTML('beforeend', T.trHint); }
+let selTimer = null, lastSel = null;
+document.addEventListener('selectionchange', () => {
+  clearTimeout(selTimer);
+  selTimer = setTimeout(() => {
+    const s = window.getSelection();
+    const txt = s ? selText(s).trim() : '';
+    if (txt.length > 3 && s.anchorNode && book.contains(s.anchorNode)) {
+      const blk = (s.anchorNode.nodeType === 1 ? s.anchorNode : s.anchorNode.parentElement).closest('[data-i]');
+      lastSel = {txt, blk};
+      selbar.classList.add('on'); hidePop();
+    } else if (!selbar.matches(':hover')) { selbar.classList.remove('on'); }
+  }, 180);
+});
+selbar.addEventListener('mousedown', e => e.preventDefault());
+selbar.querySelectorAll('button').forEach(b => b.onclick = () => {
+  if (!lastSel) return;
+  selbar.classList.remove('on');
+  openHelper(b.dataset.a, lastSel.txt, lastSel.blk);
+  try { window.getSelection().removeAllRanges(); } catch(e){}
+});
+
+/* ---------- helper panel ---------- */
+const TITLES = {cevir:T.translation, sade:T.simplify, ozet:T.summarize, acikla:T.explain, yer:T.whereTitle};
+const TASK = {cevir:T.tCevir(SRC_NAME), sade:T.tSade(CFG.audience), ozet:T.tOzet, acikla:T.tAcikla, yer:T.tYer};
+let convo = [];
+function openHelper(kind, text, blk){
+  abortAll();
+  openEl('#panel');
+  $('#ptitle').textContent = TITLES[kind];
+  const pb = $('#pbody'), pf = $('#pfoot');
+  pb.innerHTML = ''; pf.innerHTML = '';
+  const q = document.createElement('div'); q.className = 'quote'; q.textContent = text.length > 1800 ? text.slice(0, 1800) + '…' : text; pb.appendChild(q);
+  if (!sample) {
+    const m = document.createElement('div'); m.className = 'msg'; m.textContent = errMsg({code:'unavailable'}); pb.appendChild(m);
+    const cp = document.createElement('button'); cp.className = 'chip pri'; cp.textContent = T.copy;
+    cp.onclick = () => { navigator.clipboard && navigator.clipboard.writeText(text).then(() => cp.textContent = T.copied, () => cp.textContent = T.copyFail); };
+    pf.appendChild(cp);
+    if (TRANSLATE) pf.appendChild(gtLink(text));
+    return;
+  }
+  const first = CFG.persona + ' ' + BOOK + ' ' + (blk ? chInfo(blk) : '') +
+    '\n\n' + T.pPassage + ':\n"""\n' + text.slice(0, 6000) + '\n"""\n\n' + T.pTask + ': ' + TASK[kind] + '\n' + T.pTail;
+  convo = [{role:'user', content:first}];
+  const form = document.createElement('form');
+  form.innerHTML = '<input><button class="chip pri" type="submit"></button>'; form.querySelector('input').placeholder = T.askPh; form.querySelector('input').setAttribute('aria-label', T.question); form.querySelector('button').textContent = T.ask;
+  const more = document.createElement('button'); more.className = 'chip'; more.type = 'button'; more.textContent = T.simpler;
+  more.onclick = () => send(T.pSimpler);
+  const ex = document.createElement('button'); ex.className = 'chip'; ex.type = 'button'; ex.textContent = T.example;
+  ex.onclick = () => send(T.pExample);
+  pf.appendChild(more); pf.appendChild(ex); pf.appendChild(form);
+  form.onsubmit = e => { e.preventDefault(); const i = form.querySelector('input'); const v = i.value.trim(); if (!v) return; i.value = ''; send(v); };
+  stream();
+}
+let busy = false;
+function send(q){
+  if (busy) return;
+  const pb = $('#pbody');
+  const u = document.createElement('div'); u.className = 'msg user'; u.textContent = q; pb.appendChild(u);
+  convo.push({role:'user', content:q});
+  stream();
+}
+function stream(){
+  const pb = $('#pbody');
+  const m = document.createElement('div'); m.className = 'msg bot'; m.innerHTML = '<span class="think dots">' + T.thinking + '</span>'; pb.appendChild(m);
+  m.scrollIntoView({block:'nearest'});
+  busy = true;
+  let auto = true;
+  ask(convo.slice(), txt => { if (txt) m.innerHTML = md(txt); if (auto) pb.scrollTop = pb.scrollHeight; }, {cache: convo.length === 1 ? true : false})
+    .then(t => { convo.push({role:'assistant', content:t}); })
+    .catch(e => { const s = errMsg(e); m.textContent = s; convo.pop(); })
+    .finally(() => { busy = false; });
+  pb.onscroll = () => { auto = pb.scrollTop + pb.clientHeight >= pb.scrollHeight - 40; };
+}
+$('#bAsk').onclick = () => {
+  const tb = topBlock(); if (!tb) return;
+  const i0 = blocks.indexOf(tb);
+  let txt = '', i = i0;
+  while (i < blocks.length) {
+    const r = blocks[i].getBoundingClientRect();
+    if (r.top > innerHeight && txt.length > 600) break;
+    txt += plainText(blocks[i]).replace(/\s+/g,' ').trim() + '\n\n';
+    if (txt.length > 5000) break;
+    i++;
+  }
+  openHelper('yer', txt.trim(), tb);
+};
+
+/* ---------- intro ---------- */
+if (!store.get('intro', false)) { setTimeout(() => $('#intro').classList.add('on'), 600); }
+$('#introOk').onclick = () => { $('#intro').classList.remove('on'); store.set('intro', true); };
+})();
+</script>
+</body>
+</html>

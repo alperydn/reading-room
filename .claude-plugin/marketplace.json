@@ -1,0 +1,15 @@
+{
+  "name": "reading-room",
+  "description": "Reading Room: turn a book or long text into an interactive reading page with a glossary, AI simplify/summarize/explain/translate, contents and themes.",
+  "owner": {
+    "name": "Alper",
+    "url": "https://github.com/alperydn"
+  },
+  "plugins": [
+    {
+      "name": "reading-room",
+      "source": "./plugins/reading-room",
+      "description": "Turns a PDF, EPUB, DOCX or text file into an interactive reading room web page (Turkish or English interface)."
+    }
+  ]
+}

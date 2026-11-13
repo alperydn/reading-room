@@ -1,0 +1,11 @@
+{
+  "title": "The Prince",
+  "lang": "tr",
+  "locale": "en",
+  "book": "\"The Prince\" (Nicolo Machiavelli, 1532; W. K. Marriott'un 1908 İngilizce çevirisi)",
+  "storePrefix": "prn_",
+  "hidden": [0, 1, 29, 30],
+  "persona": "Sen İngilizce siyaset felsefesi metinleri okuyan Türk bir okura yardım eden sabırlı bir öğretmensin.",
+  "audience": "siyaset felsefesi bilgisi olmayan",
+  "termHint": "Siyaset felsefesine ya da Rönesans İtalya'sına özgü bir terim ya da adsa bu metindeki anlamını kısaca belirt."
+}

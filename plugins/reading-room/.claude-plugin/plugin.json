@@ -1,0 +1,21 @@
+{
+  "name": "reading-room",
+  "version": "1.4.1",
+  "description": "Turns a PDF, EPUB, DOCX or text file into an interactive reading room web page with glossary, footnotes, contents, themes and AI help (simplify, summarize, explain, translate). Turkish or English interface.",
+  "author": {
+    "name": "Alper",
+    "url": "https://github.com/alperydn"
+  },
+  "license": "MIT",
+  "keywords": [
+    "reading",
+    "books",
+    "pdf",
+    "epub",
+    "glossary",
+    "translation",
+    "turkish"
+  ],
+  "homepage": "https://github.com/alperydn/reading-room",
+  "repository": "https://github.com/alperydn/reading-room"
+}
