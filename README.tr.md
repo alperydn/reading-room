@@ -98,6 +98,11 @@ Veri biçimi [`references/veri-semasi.md`](plugins/reading-room/skills/reading-r
 
 Bir okuma odası kitabın tam metnini içerir. Kullanma hakkınız olan bir kitaptan oluşturun; telifli bir kitaptan yaptığınız sayfayı herkese açık paylaşmayın.
 
+## Yeni sürüm çıkarmak
+
+1. `plugins/reading-room/.claude-plugin/plugin.json` ve `SKILL.md` içindeki `version` değerini güncelleyin, `CHANGELOG.md`'ye bir kayıt ekleyin.
+2. GitHub'da yeni bir `vX.Y.Z` etiketiyle sürüm oluşturun. Dosya eklemenize gerek yok: bir otomasyon `reading-room-skill.zip`'i paketleyip sürüme ekler.
+
 ## Lisans
 
 [MIT](LICENSE)

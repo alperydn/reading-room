@@ -1,24 +1,30 @@
-name: Release
+name: Release asset
 
-# Bir sürüm etiketi (v1.4.1 gibi) itildiğinde skill zip'ini paketler ve GitHub sürümünü yayınlar.
+# GitHub'da bir sürüm (release) yayınlandığında skill zip'ini paketler ve o sürüme ekler.
+# Sürümü oluşturmak elle yapılır; zip eklemek gerekmez. Zip zaten varsa güncellenir.
 on:
-  push:
-    tags: ["v*"]
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Zip'in ekleneceği sürüm etiketi (ör. v1.4.1)"
+        required: true
 
 permissions:
   contents: write
 
 jobs:
-  release:
+  asset:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name || inputs.tag }}
       - name: Skill zip'ini paketle
         run: sh tools/package.sh
-      - name: Sürümü yayınla
+      - name: Zip'i sürüme ekle
         env:
           GH_TOKEN: ${{ github.token }}
-        run: |
-          gh release create "$GITHUB_REF_NAME" dist/reading-room-skill.zip \
-            --title "Reading Room ${GITHUB_REF_NAME#v}" \
-            --notes-file .github/release-notes.md
+          TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: gh release upload "$TAG" dist/reading-room-skill.zip --clobber

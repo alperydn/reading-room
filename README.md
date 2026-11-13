@@ -98,6 +98,11 @@ The skill's own instructions (`SKILL.md`) and the data schema are written in Tur
 
 A reading room contains the full text of the book. Build one from a book you have the right to use, and do not share a page made from a copyrighted book publicly.
 
+## Releasing
+
+1. Update `version` in `plugins/reading-room/.claude-plugin/plugin.json` and in `SKILL.md`, and add an entry to `CHANGELOG.md`.
+2. On GitHub, create a release with a new tag `vX.Y.Z`. You do not need to attach anything: a workflow packages `reading-room-skill.zip` and adds it to the release.
+
 ## License
 
 [MIT](LICENSE)
